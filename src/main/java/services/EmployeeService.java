@@ -109,7 +109,7 @@ public class EmployeeService extends ServiceBase {
             //社員番号についてのバリデーションを行う
             validateCode = true;
             //変更後の社員番号を設定する
-            savedEmp.setCode(ev.getCode());
+            //savedEmp.setCode(ev.getCode());
         }
 
         boolean validatePass = false;
@@ -120,12 +120,12 @@ public class EmployeeService extends ServiceBase {
             validatePass = true;
 
             //変更後のパスワードをハッシュ化し設定する
-            savedEmp.setPassword(
-                    EncryptUtil.getPasswordEncrypt(ev.getPassword(), pepper));
+            //savedEmp.setPassword(
+                    //EncryptUtil.getPasswordEncrypt(ev.getPassword(), pepper));
         }
 
-        savedEmp.setName(ev.getName()); //変更後の氏名を設定する
-        savedEmp.setAdminFlag(ev.getAdminFlag()); //変更後の管理者フラグを設定する
+        //savedEmp.setName(ev.getName()); //変更後の氏名を設定する
+        //savedEmp.setAdminFlag(ev.getAdminFlag()); //変更後の管理者フラグを設定する
 
         //更新日時に現在時刻を設定する
         LocalDateTime today = LocalDateTime.now();
