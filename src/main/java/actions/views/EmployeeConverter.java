@@ -11,7 +11,7 @@ import models.Employee;
  * 従業員データのDTOモデル⇔Viewモデルの変換を行うクラス
  *
  */
-public class employeeConverter {
+public class EmployeeConverter {
 
         /**
          * ViewモデルのインスタンスからDTOモデルのインスタンスを作成する
