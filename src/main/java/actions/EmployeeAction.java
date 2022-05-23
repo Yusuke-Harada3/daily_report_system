@@ -12,10 +12,10 @@ import constants.JpaConst;
 import services.EmployeeService;
 
 /**
- * 従業員にかかわる処理を行うActionクラス
+ * 従業員に関わる処理を行うActionクラス
  *
  */
-public class EmployeeAction extends ActionBase{
+public class EmployeeAction extends ActionBase {
 
     private EmployeeService service;
 
@@ -23,7 +23,8 @@ public class EmployeeAction extends ActionBase{
      * メソッドを実行する
      */
     @Override
-    public void process() throws ServletException, IOException{
+    public void process() throws ServletException, IOException {
+
         service = new EmployeeService();
 
         //メソッドを実行
@@ -31,10 +32,11 @@ public class EmployeeAction extends ActionBase{
 
         service.close();
     }
+
     /**
      * 一覧画面を表示する
      * @throws ServletException
-     * @throws IOExeption
+     * @throws IOException
      */
     public void index() throws ServletException, IOException {
 
@@ -61,4 +63,5 @@ public class EmployeeAction extends ActionBase{
         forward(ForwardConst.FW_EMP_INDEX);
 
     }
+
 }

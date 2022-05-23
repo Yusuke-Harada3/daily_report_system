@@ -15,101 +15,107 @@ import constants.AttributeConst;
 import constants.ForwardConst;
 import constants.PropertyConst;
 
-/*
-     * 各Actionクラスの親クラス。共通処理を行う。
-     */
-
+/**
+ * 各Actionクラスの親クラス。共通処理を行う。
+ *
+ */
 public abstract class ActionBase {
     protected ServletContext context;
     protected HttpServletRequest request;
     protected HttpServletResponse response;
 
-
-       /*
-        * 初期化処理
-        * サーブレットコンテキスト、リクエスト、レスポンスをクラスフィールドに設定
-        * @param servletContext
-        * @param servletRequest
-        * @param servletResponse
-        */
-
-        public void init(
-                ServletContext servletContext,
-                HttpServletRequest servletRequest,
-                HttpServletResponse servletResponse) {
-            this.context = servletContext;
-            this.request = servletRequest;
-            this.response = servletResponse;
-
-        }
-        /*
-         * フロントコントローラから呼び出されるメソッド
-         * @throws ServletException
-         * @throws IOException
-         */
-
-      public abstract void process() throws ServletException, IOException;
-
-        /*
-         *パラメータのcommandの値に該当するメソッドを実行する
-         *@throws ServletException
-         *@throws IOException
-         */
-      protected void invoke() throws ServletException, IOException{
-
-          Method commandMethod;
-          try {
-              //パラメータからcommandを取得
-              String command = request.getParameter(ForwardConst.CMD.getValue());
-
-              //commandに該当するメソッドを実行する
-              commandMethod = this.getClass().getDeclaredMethod(command,new Class[0]);
-              commandMethod.invoke(this, new Object[0]); //メソッドに渡す引数はなし
-
-          } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
-                  | InvocationTargetException | NullPointerException e) {
-
-              //発生した例外をコンソールに表示
-              e.printStackTrace();
-              //commandの値が不正で実行できない場合エラー画面を呼び出し
-              forward(ForwardConst.FW_ERR_UNKNOWN);
-          }
-          }
     /**
- * 指定されたjspの呼び出しを行う
- * @param target 遷移先jsp画面のファイル名(拡張子を含まない)
- * @throws ServletException
- * @throws IOException
- */
-protected void forward(ForwardConst target) throws ServletException, IOException {
+     * 初期化処理
+     * サーブレットコンテキスト、リクエスト、レスポンスをクラスフィールドに設定
+     * @param servletContext
+     * @param servletRequest
+     * @param servletResponse
+     */
+    public void init(
+            ServletContext servletContext,
+            HttpServletRequest servletRequest,
+            HttpServletResponse servletResponse) {
+        this.context = servletContext;
+        this.request = servletRequest;
+        this.response = servletResponse;
+    }
 
-    //jspファイルの相対パスを作成
-    String forward = String.format("/WEB-INF/views/%s.jsp", target.getValue());
-    RequestDispatcher dispatcher = request.getRequestDispatcher(forward);
+    /**
+     * フロントコントローラから呼び出されるメソッド
+     * @throws ServletException
+     * @throws IOException
+     */
+    public abstract void process() throws ServletException, IOException;
 
-    //jspファイルの呼び出し
-    dispatcher.forward(request, response);
+    /**
+     * パラメータのcommandの値に該当するメソッドを実行する
+     * @throws ServletException
+     * @throws IOException
+     */
+    protected void invoke()
+            throws ServletException, IOException {
 
-}
+        Method commandMethod;
+        try {
 
-    /*
-     * URLを構築し、リダイレクトを行う
+            //パラメータからcommandを取得
+            String command = request.getParameter(ForwardConst.CMD.getValue());
+
+            //ommandに該当するメソッドを実行する
+            //(例: action=Employee command=show の場合 EmployeeActionクラスのshow()メソッドを実行する)
+            commandMethod = this.getClass().getDeclaredMethod(command, new Class[0]);
+            commandMethod.invoke(this, new Object[0]); //メソッドに渡す引数はなし
+
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+                | InvocationTargetException | NullPointerException e) {
+
+            //発生した例外をコンソールに表示
+            e.printStackTrace();
+            //commandの値が不正で実行できない場合エラー画面を呼び出し
+            forward(ForwardConst.FW_ERR_UNKNOWN);
+        }
+
+    }
+
+    /**
+     * 指定されたjspの呼び出しを行う
+     * @param target 遷移先jsp画面のファイル名(拡張子を含まない)
+     * @throws ServletException
+     * @throws IOException
+     */
+    protected void forward(ForwardConst target) throws ServletException, IOException {
+
+        //jspファイルの相対パスを作成
+        String forward = String.format("/WEB-INF/views/%s.jsp", target.getValue());
+        RequestDispatcher dispatcher = request.getRequestDispatcher(forward);
+
+        //jspファイルの呼び出し
+        dispatcher.forward(request, response);
+
+    }
+
+    /**
+     * URLを構築しリダイレクトを行う
      * @param action パラメータに設定する値
      * @param command パラメータに設定する値
      * @throws ServletException
      * @throws IOException
      */
-    protected void redirect(ForwardConst action, ForwardConst command) throws ServletException, IOException{
+    protected void redirect(ForwardConst action, ForwardConst command)
+            throws ServletException, IOException {
+
         //URLを構築
-        String redirectUrl = request.getContextPath()+"/?action=" + action.getValue();
-        if(command != null) {
-            redirectUrl = redirectUrl + "&command="  +command.getValue();
+        String redirectUrl = request.getContextPath() + "/?action=" + action.getValue();
+        if (command != null) {
+            redirectUrl = redirectUrl + "&command=" + command.getValue();
         }
 
+        //URLへリダイレクト
         response.sendRedirect(redirectUrl);
+
     }
 
-    /*
+    /**
      * CSRF対策 token不正の場合はエラー画面を表示
      * @return true: token有効 false: token不正
      * @throws ServletException

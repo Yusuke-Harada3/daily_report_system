@@ -1,19 +1,23 @@
 package constants;
 
+/**
+ * 画面の項目値等を定義するEnumクラス
+ *
+ */
 public enum AttributeConst {
 
     //フラッシュメッセージ
     FLUSH("flush"),
 
     //一覧画面共通
-    MAX_ROW("macRow"),
+    MAX_ROW("maxRow"),
     PAGE("page"),
 
     //入力フォーム共通
     TOKEN("_token"),
     ERR("errors"),
 
-  //ログイン中の従業員
+    //ログイン中の従業員
     LOGIN_EMP("login_employee"),
 
     //ログイン画面
@@ -39,7 +43,7 @@ public enum AttributeConst {
 
     //日報管理
     REPORT("report"),
-    RERORTS("reports"),
+    REPORTS("reports"),
     REP_COUNT("reports_count"),
     REP_ID("id"),
     REP_DATE("report_date"),
@@ -53,18 +57,18 @@ public enum AttributeConst {
         this.text = text;
         this.i = null;
     }
-    private AttributeConst(final Integer i ) {
+
+    private AttributeConst(final Integer i) {
         this.text = null;
         this.i = i;
-
     }
+
     public String getValue() {
-        return text;
+        return this.text;
     }
+
     public Integer getIntegerValue() {
-        return i;
+        return this.i;
     }
-
-
 
 }
