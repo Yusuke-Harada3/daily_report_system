@@ -13,24 +13,22 @@ import models.validators.EmployeeValidator;
 import utils.EncryptUtil;
 
 /**
- * 従業員テーブルの操作にかかわる処理を行うクラス
+ * 従業員テーブルの操作に関わる処理を行うクラス
  */
-
 public class EmployeeService extends ServiceBase {
 
     /**
      * 指定されたページ数の一覧画面に表示するデータを取得し、EmployeeViewのリストで返却する
-     *@param page ページ数
-     *@return 表示するデータのリスト
+     * @param page ページ数
+     * @return 表示するデータのリスト
      */
+    public List<EmployeeView> getPerPage(int page) {
+        List<Employee> employees = em.createNamedQuery(JpaConst.Q_EMP_GET_ALL, Employee.class)
+                .setFirstResult(JpaConst.ROW_PER_PAGE * (page - 1))
+                .setMaxResults(JpaConst.ROW_PER_PAGE)
+                .getResultList();
 
-    public List<EmployeeView> getPerPage(int page){
-        List<Employee> emloyees = em.createNamedQuery(JpaConst.Q_EMP_GET_ALL,Employee.class)
-        .setFirstResult(JpaConst.ROW_PER_PAGE * (page - 1))
-        .setMaxResults(JpaConst.ROW_PER_PAGE)
-        .getResultList();
-
-        return EmployeeConverter.toViewList(emloyees);
+        return EmployeeConverter.toViewList(employees);
     }
 
     /**
@@ -38,9 +36,10 @@ public class EmployeeService extends ServiceBase {
      * @return 従業員テーブルのデータの件数
      */
     public long countAll() {
-        long empCount = (long)em.createNamedQuery(JpaConst.Q_EMP_COUNT,Long.class)
+        long empCount = (long) em.createNamedQuery(JpaConst.Q_EMP_COUNT, Long.class)
                 .getSingleResult();
-    return empCount;
+
+        return empCount;
     }
 
     /**
@@ -62,18 +61,18 @@ public class EmployeeService extends ServiceBase {
                     .setParameter(JpaConst.JPQL_PARM_PASSWORD, pass)
                     .getSingleResult();
 
-    } catch (NoResultException ex) {
+        } catch (NoResultException ex) {
+        }
+
+        return EmployeeConverter.toView(e);
 
     }
-        return EmployeeConverter.toView(e);
-}
 
     /**
      * idを条件に取得したデータをEmployeeViewのインスタンスで返却する
      * @param id
      * @return 取得データのインスタンス
      */
-
     public EmployeeView findOne(int id) {
         Employee e = findOneInternal(id);
         return EmployeeConverter.toView(e);
@@ -85,10 +84,41 @@ public class EmployeeService extends ServiceBase {
      * @return 該当するデータの件数
      */
     public long countByCode(String code) {
-        long employees_count = (long) em.createNamedQuery(JpaConst.Q_EMP_COUNT_RESISTERED_BY_CODE,Long.class)
+
+        //指定した社員番号を保持する従業員の件数を取得する
+        long employees_count = (long) em.createNamedQuery(JpaConst.Q_EMP_COUNT_RESISTERED_BY_CODE, Long.class)
                 .setParameter(JpaConst.JPQL_PARM_CODE, code)
                 .getSingleResult();
         return employees_count;
+    }
+
+    /**
+     * 画面から入力された従業員の登録内容を元にデータを1件作成し、従業員テーブルに登録する
+     * @param ev 画面から入力された従業員の登録内容
+     * @param pepper pepper文字列
+     * @return バリデーションや登録処理中に発生したエラーのリスト
+     */
+    public List<String> create(EmployeeView ev, String pepper) {
+
+        //パスワードをハッシュ化して設定
+        String pass = EncryptUtil.getPasswordEncrypt(ev.getPassword(), pepper);
+        ev.setPassword(pass);
+
+        //登録日時、更新日時は現在時刻を設定する
+        LocalDateTime now = LocalDateTime.now();
+        ev.setCreatedAt(now);
+        ev.setUpdatedAt(now);
+
+        //登録内容のバリデーションを行う
+        List<String> errors = EmployeeValidator.validate(this, ev, true, true);
+
+        //バリデーションエラーがなければデータを登録する
+        if (errors.size() == 0) {
+            create(ev);
+        }
+
+        //エラーを返却（エラーがなければ0件の空リスト）
+        return errors;
     }
 
     /**
@@ -109,7 +139,7 @@ public class EmployeeService extends ServiceBase {
             //社員番号についてのバリデーションを行う
             validateCode = true;
             //変更後の社員番号を設定する
-            //savedEmp.setCode(ev.getCode());
+            savedEmp.setCode(ev.getCode());
         }
 
         boolean validatePass = false;
@@ -120,12 +150,12 @@ public class EmployeeService extends ServiceBase {
             validatePass = true;
 
             //変更後のパスワードをハッシュ化し設定する
-            //savedEmp.setPassword(
-                    //EncryptUtil.getPasswordEncrypt(ev.getPassword(), pepper));
+            savedEmp.setPassword(
+                    EncryptUtil.getPasswordEncrypt(ev.getPassword(), pepper));
         }
 
-        //savedEmp.setName(ev.getName()); //変更後の氏名を設定する
-        //savedEmp.setAdminFlag(ev.getAdminFlag()); //変更後の管理者フラグを設定する
+        savedEmp.setName(ev.getName()); //変更後の氏名を設定する
+        savedEmp.setAdminFlag(ev.getAdminFlag()); //変更後の管理者フラグを設定する
 
         //更新日時に現在時刻を設定する
         LocalDateTime today = LocalDateTime.now();
@@ -224,4 +254,5 @@ public class EmployeeService extends ServiceBase {
         em.getTransaction().commit();
 
     }
+
 }
