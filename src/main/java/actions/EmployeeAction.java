@@ -151,7 +151,7 @@ public class EmployeeAction extends ActionBase {
      * @throws ServletException
      * @throws IOException
      */
-    public void edit() throws ServletException, IOException{]
+    public void edit() throws ServletException, IOException{
         if(checkAdmin()) {
         EmployeeView ev = service.findOne(toNumber(getRequestParam(AttributeConst.EMP_ID)));
 
